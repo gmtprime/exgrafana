@@ -105,7 +105,7 @@ defmodule Exgrafana do
   @doc false
   def do_set_dashboard(body) do
     path = "/api/dashboards/db"
-    encoded = Poison.encode(body)
+    encoded = Poison.encode!(body)
     case Exgrafana.post!(path, encoded) do
       %HTTPoison.Response{status_code: 200, body: response} ->
         {:ok, response}
