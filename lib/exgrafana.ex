@@ -1,6 +1,24 @@
 defmodule Exgrafana do
   @moduledoc """
   Grafana (incomplete) API.
+
+  The available functions are:
+
+  ```elixir
+  @spec create_dashboard(map) :: {:ok, map} | {:error, term}
+  @spec create_dashboard(map, Keyword.t) :: {:ok, map} | {:error, term}
+
+  @spec get_dashboard(binary) :: {:ok, map} | {:error, term}
+
+  @spec update_dashboard(map) :: {:ok, map} | {:error, term}
+  @spec update_dashboard(map, Keyword.t) :: {:ok, map} | {:error, term}
+
+  @spec delete_dashboard(binary) :: {:ok, map} | {:error, term}
+  ```
+
+  For more information about the dashboard model structure and the slugs look
+  at
+  [Grafana HTTP API reference](http://docs.grafana.org/reference/http_api/).
   """
   use HTTPoison.Base
 
