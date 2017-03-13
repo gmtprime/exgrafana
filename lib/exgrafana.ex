@@ -1,10 +1,11 @@
 defmodule Exgrafana do
   @moduledoc """
-  Grafana API.
+  Grafana (incomplete) API.
   """
   use HTTPoison.Base
 
-  @schema_version 14
+  @schema_version Application.get_env(:exgrafana, :version, 14)
+  @module Application.get_env(:exgrafana, :module, __MODULE__)
 
   ############
   # Public API
@@ -13,6 +14,9 @@ defmodule Exgrafana do
   Creates a dashboard from a `dashboard` model. By default, the schema
   version is #{@schema_version}. To overwrite just pass a list of `options`
   with the option `:schema_version` as the desired version.
+
+      iex> Exgrafana.create_dashboard(%{"title" => "Create Dashboard"})
+      {:ok, %{"slug" => "create-dashboard", "version" => 0, (...)}}
   """
   @spec create_dashboard(map) :: {:ok, map} | {:error, term}
   @spec create_dashboard(map, Keyword.t) :: {:ok, map} | {:error, term}
@@ -38,11 +42,14 @@ defmodule Exgrafana do
 
   @doc """
   Gets a dashboard by `name`.
+
+    iex> Exgrafana.get_dashboard("get-dashboard")
+    {:ok, %{"dashboard" => (...)}}
   """
   @spec get_dashboard(binary) :: {:ok, map} | {:error, term}
   def get_dashboard(name) when is_binary(name) do
     path = "/api/dashboards/db/#{name}"
-    case Exgrafana.get!(path) do
+    case @module.get!(path) do
       %HTTPoison.Response{status_code: 200, body: body} ->
         {:ok, body}
       %HTTPoison.Response{status_code: 404} ->
@@ -56,6 +63,9 @@ defmodule Exgrafana do
   Updates a dashboard from a `dashboard` model. By default, it does not
   overwrites the dashboard. To overwrite just pass a list of `options` with the
   option `:overwrite` as `true`.
+
+      iex> Exgrafana.update_dashboard(%{"id" => 1, (...)})
+      {:ok, %{"slug" => "update-dashboard", "version" => 1, (...)}}
   """
   @spec update_dashboard(map) :: {:ok, map} | {:error, term}
   @spec update_dashboard(map, Keyword.t) :: {:ok, map} | {:error, term}
@@ -80,11 +90,14 @@ defmodule Exgrafana do
 
   @doc """
   Deletes a dashboard by `name`.
+
+      iex> Exgrafana.delete_dashboard("delete-dashboard")
+      {:ok, %{"title" => "Delete Dashboard"}}
   """
   @spec delete_dashboard(binary) :: {:ok, map} | {:error, term}
   def delete_dashboard(name) when is_binary(name) do
     path = "/api/dashboards/db/#{name}"
-    case Exgrafana.delete!(path) do
+    case @module.delete!(path) do
       %HTTPoison.Response{status_code: 200, body: body} ->
         {:ok, body}
       %HTTPoison.Response{status_code: 404} ->
@@ -117,7 +130,7 @@ defmodule Exgrafana do
   def do_set_dashboard(body) do
     path = "/api/dashboards/db"
     encoded = Poison.encode!(body)
-    case Exgrafana.post!(path, encoded) do
+    case @module.post!(path, encoded) do
       %HTTPoison.Response{status_code: 200, body: response} ->
         {:ok, response}
       %HTTPoison.Response{status_code: 400, body: %{"message" => message}} ->
