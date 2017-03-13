@@ -2,28 +2,13 @@ defmodule Exgrafana do
   @moduledoc """
   Grafana (incomplete) API.
 
-  The available functions are:
-
-  ```elixir
-  @spec create_dashboard(map) :: {:ok, map} | {:error, term}
-  @spec create_dashboard(map, Keyword.t) :: {:ok, map} | {:error, term}
-
-  @spec get_dashboard(binary) :: {:ok, map} | {:error, term}
-
-  @spec update_dashboard(map) :: {:ok, map} | {:error, term}
-  @spec update_dashboard(map, Keyword.t) :: {:ok, map} | {:error, term}
-
-  @spec delete_dashboard(binary) :: {:ok, map} | {:error, term}
-  ```
-
   For more information about the dashboard model structure and the slugs look
   at
   [Grafana HTTP API reference](http://docs.grafana.org/reference/http_api/).
   """
-  use HTTPoison.Base
 
   @schema_version Application.get_env(:exgrafana, :version, 14)
-  @module Application.get_env(:exgrafana, :module, __MODULE__)
+  @module Application.get_env(:exgrafana, :module, Exgrafana.Base)
 
   ############
   # Public API
@@ -59,14 +44,14 @@ defmodule Exgrafana do
   end
 
   @doc """
-  Gets a dashboard by `name`.
+  Gets a dashboard by `slug`.
 
-    iex> Exgrafana.get_dashboard("get-dashboard")
-    {:ok, %{"dashboard" => (...)}}
+      iex> Exgrafana.get_dashboard("get-dashboard")
+      {:ok, %{"dashboard" => (...)}}
   """
   @spec get_dashboard(binary) :: {:ok, map} | {:error, term}
-  def get_dashboard(name) when is_binary(name) do
-    path = "/api/dashboards/db/#{name}"
+  def get_dashboard(slug) when is_binary(slug) do
+    path = "/api/dashboards/db/#{slug}"
     case @module.get!(path) do
       %HTTPoison.Response{status_code: 200, body: body} ->
         {:ok, body}
@@ -107,14 +92,14 @@ defmodule Exgrafana do
   def update_dashboard(_, _), do: {:error, "No ID supplied"}
 
   @doc """
-  Deletes a dashboard by `name`.
+  Deletes a dashboard by `slug`.
 
       iex> Exgrafana.delete_dashboard("delete-dashboard")
       {:ok, %{"title" => "Delete Dashboard"}}
   """
   @spec delete_dashboard(binary) :: {:ok, map} | {:error, term}
-  def delete_dashboard(name) when is_binary(name) do
-    path = "/api/dashboards/db/#{name}"
+  def delete_dashboard(slug) when is_binary(slug) do
+    path = "/api/dashboards/db/#{slug}"
     case @module.delete!(path) do
       %HTTPoison.Response{status_code: 200, body: body} ->
         {:ok, body}
@@ -160,29 +145,5 @@ defmodule Exgrafana do
       %HTTPoison.Error{reason: message} ->
         {:error, message}
     end
-  end
-
-  #####################
-  # HTTPoison callbacks
-
-  @url Application.get_env(:exgrafana, :url, "")
-  @token Application.get_env(:exgrafana, :token, "")
-
-  @doc false
-  def process_url(url) do
-    @url <> url
-  end
-
-  @doc false
-  def process_request_headers(headers) do
-    [{"Authorization", "Bearer #{@token}"},
-     {"Content-Type", "application/json"},
-     {"Accept", "application/json"}
-     | headers]
-  end
-
-  @doc false
-  def process_response_body(body) do
-    Poison.decode!(body)
   end
 end
