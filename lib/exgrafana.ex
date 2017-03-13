@@ -4,19 +4,30 @@ defmodule Exgrafana do
   """
   use HTTPoison.Base
 
+  @schema_version 14
+
   ############
   # Public API
 
   @doc """
-  Creates a dashboard from a `dashboard` definition.
+  Creates a dashboard from a `dashboard` model. By default, the schema
+  version is #{@schema_version}. To overwrite just pass a list of `options`
+  with the option `:schema_version` as the desired version.
   """
   @spec create_dashboard(map) :: {:ok, map} | {:error, term}
-  def create_dashboard(%{"id" => id}) when not is_nil(id) do
+  @spec create_dashboard(map, Keyword.t) :: {:ok, map} | {:error, term}
+  def create_dashboard(dashboard, options \\ [])
+  def create_dashboard(%{"id" => id}, _) when not is_nil(id) do
     {:error, "ID must be nil"}
   end
-  def create_dashboard(dashboard) do
+  def create_dashboard(dashboard, options) do
+    schema_version = Keyword.get(options, :schema_version, @schema_version)
     slug = get_slug(dashboard)
     with {:error, _} <- get_dashboard(slug) do
+      dashboard =
+        dashboard
+        |> Map.put("version", 0)
+        |> Map.put("schemaVersion", schema_version)
       body = %{"dashboard" => dashboard, "overwrite" => false}
       do_set_dashboard(body)
     else
@@ -42,7 +53,7 @@ defmodule Exgrafana do
   end
 
   @doc """
-  Updates a dashboard from a `dashboard` definition. By default, it does not
+  Updates a dashboard from a `dashboard` model. By default, it does not
   overwrites the dashboard. To overwrite just pass a list of `options` with the
   option `:overwrite` as `true`.
   """
@@ -53,7 +64,7 @@ defmodule Exgrafana do
     slug = get_slug(dashboard)
     with {:ok, current} <- get_dashboard(slug) do
       version = get_version(current) + 1
-      schema_version = get_schema_version(current) + 1
+      schema_version = get_schema_version(current)
       overwrite = Keyword.get(options, :overwrite, false)
       dashboard =
         dashboard
@@ -133,7 +144,10 @@ defmodule Exgrafana do
 
   @doc false
   def process_request_headers(headers) do
-    [{"Authorization", "Bearer #{@token}"} | headers]
+    [{"Authorization", "Bearer #{@token}"},
+     {"Content-Type", "application/json"},
+     {"Accept", "application/json"}
+     | headers]
   end
 
   @doc false
