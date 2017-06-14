@@ -6,9 +6,10 @@ defmodule Exgrafana do
   at
   [Grafana HTTP API reference](http://docs.grafana.org/reference/http_api/).
   """
+  alias Exgrafana.Settings
 
-  @schema_version Application.get_env(:exgrafana, :version, 14)
-  @module Application.get_env(:exgrafana, :module, Exgrafana.Base)
+  @schema_version Settings.exgrafana_version()
+  @module Settings.exgrafana_module()
 
   ############
   # Public API

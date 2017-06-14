@@ -28,15 +28,18 @@ The following are the configuration arguments available:
 
   * `:url` - URL of your Grafana server.
   * `:token` - Your API token.
-  * `version` - Schema version (Default is 14).
+  * `:version` - Schema version (Default is 14).
 
-i.e:
+e.g:
 
 ```elixir
 config :exgrafana
   url: "<URL of your Grafana server>",
   token: "<your API token>"
 ```
+
+The OS environment variables `$EXGRAFANA_URL`, `$EXGRAFANA_TOKEN` and
+`$EXGRAFANA_VERSION` can be used instead.
 
 ## Installation
 

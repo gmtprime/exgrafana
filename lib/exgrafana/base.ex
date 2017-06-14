@@ -4,8 +4,10 @@ defmodule Exgrafana.Base do
   """
   use HTTPoison.Base
 
-  @url Application.get_env(:exgrafana, :url, "")
-  @token Application.get_env(:exgrafana, :token, "")
+  alias Exgrafana.Settings
+
+  @url Settings.exgrafana_url()
+  @token Settings.exgrafana_token()
 
   @doc false
   def process_url(url) do

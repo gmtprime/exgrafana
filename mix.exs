@@ -1,7 +1,7 @@
 defmodule Exgrafana.Mixfile do
   use Mix.Project
 
-  @version "0.1.1"
+  @version "0.1.2"
 
   def project do
     [app: :exgrafana,
@@ -20,12 +20,12 @@ defmodule Exgrafana.Mixfile do
   end
 
   defp deps do
-    [{:poison, "~> 2.2"},
+    [{:poison, "~> 2.2 or ~> 3.0"},
      {:httpoison, "~> 0.11"},
-     {:earmark, ">= 0.0.0", only: :dev},
+     {:skogsra, "~> 0.1"},
      {:ex_doc, "~> 0.13", only: :dev},
      {:inch_ex, "~> 0.5", only: [:dev, :test]},
-     {:credo, "~> 0.6", only: [:dev, :test]}]
+     {:credo, "~> 0.8", only: [:dev, :test]}]
   end
 
   defp docs do
